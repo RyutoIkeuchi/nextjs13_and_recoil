@@ -1,39 +1,37 @@
 'use client';
 
 import Link from 'next/link';
-import { atom, selector, useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilCallback, useRecoilState, useRecoilValue } from 'recoil';
+import {
+	countState,
+	multipleOf3Selector,
+	squareCountSelector,
+} from '../../state/countState';
 
-const textState = atom({
-	key: 'textState',
-	default: '',
-});
+export default function CountPage() {
+	const [count, setCount] = useRecoilState(countState);
+	const squareCount = useRecoilValue(squareCountSelector);
+	const multipleOf3 = useRecoilValue(multipleOf3Selector);
 
-const charCountState = selector({
-	key: 'charCountState',
-	get: ({ get }) => {
-		const text = get(textState);
-		return text.length;
-	},
-});
-
-const CharacterCount = () => {
-	const count = useRecoilValue(charCountState);
-	return <div>Character Count: {count}</div>;
-};
-
-export default function TextInput() {
-	const [text, setText] = useRecoilState(textState);
-
-	const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setText(event.target.value);
-	};
+	const alertCount = useRecoilCallback(
+		({ snapshot }) =>
+			async () => {
+				const count = await snapshot.getPromise(countState);
+				alert(count);
+			},
+		[]
+	);
 
 	return (
 		<div>
-			<input type="text" value={text} onChange={onChange} />
-			<br />
-			Echo: {text}
-			<CharacterCount />
+			<div style={{ marginBottom: '20px' }}>
+				<p>{multipleOf3}</p>
+				<p>{count}</p>
+				<p>{squareCount}</p>
+				<button onClick={() => setCount(count + 1)}>+1</button>
+				<button onClick={alertCount}>アラート表示</button>
+			</div>
+			<hr />
 			<Link href="recoil-study/todo">Todo画面へ</Link>
 		</div>
 	);
